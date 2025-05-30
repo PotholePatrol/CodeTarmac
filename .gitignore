@@ -8,6 +8,10 @@
 # testing
 /coverage
 
+#ignore all .env  FILES IN THE REPO
+*.env 
+
+
 # production
 /build
 
