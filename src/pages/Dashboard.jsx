@@ -28,6 +28,7 @@ L.Icon.Default.mergeOptions({
 // Constants
 const API_ENDPOINT = 'http://localhost:5000/analyze';
 const NOMINATIM_API = 'https://nominatim.openstreetmap.org/search';
+const HEAT_MAP_DATA = " http://localhost:5000/heatmap-data"
 
 const roadTypes = [
   { name: 'Highway', value: 'highway', color: 'bg-red-100 text-red-800' },
@@ -65,8 +66,8 @@ const renderStars = (count) => {
   return (
     <div className="flex">
       {[...Array(5)].map((_, i) => (
-        <i 
-          key={i} 
+        <i
+          key={i}
           className={`pi ${i < count ? 'pi-star-fill text-yellow-500' : 'pi-star text-gray-300'}`}
         />
       ))}
@@ -119,9 +120,9 @@ const LocationMarker = ({ points, setPoints, selectionMode, allData, setModalDat
               <div className="text-xs">Lng: {points[1].lng.toFixed(6)}</div>
             </Popup>
           </Marker>
-          <Polyline 
-            positions={points} 
-            color="#3B82F6" 
+          <Polyline
+            positions={points}
+            color="#3B82F6"
             weight={4}
             dashArray="5, 5"
           />
@@ -155,9 +156,9 @@ const CoordinatePopup = ({ popup, setCoordinatePopup }) => {
       <div>
         <p className="text-sm font-medium">{popup.content}</p>
       </div>
-      <button 
+      <button
         className="ml-3 text-gray-500 hover:text-gray-700"
-        onClick={() => setCoordinatePopup({...popup, visible: false})}
+        onClick={() => setCoordinatePopup({ ...popup, visible: false })}
       >
         <i className="pi pi-times"></i>
       </button>
@@ -175,11 +176,11 @@ const DetectionModal = ({ modalData, setModalData }) => {
   if (!modalData) return null;
 
   return (
-    <div className="detection-modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
-         onClick={handleBackgroundClick}>
+    <div className="detection-modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleBackgroundClick}>
       <div className="detection-modal bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-auto">
-        <button className="close-btn absolute top-4 right-4 text-2xl" 
-                onClick={() => setModalData(null)}>&times;</button>
+        <button className="close-btn absolute top-4 right-4 text-2xl"
+          onClick={() => setModalData(null)}>&times;</button>
         <h2 className="text-xl font-bold mb-4">{modalData.label}</h2>
         {modalData.image_url && (
           <img
@@ -211,9 +212,9 @@ const FileUploadTemplate = {
   item: (file, props) => (
     <div className="flex items-center p-3 border border-gray-200 rounded-lg mb-2 bg-white hover:bg-gray-50 transition-colors">
       <div className="relative flex-shrink-0">
-        <img 
-          alt={file.name} 
-          src={file.objectURL} 
+        <img
+          alt={file.name}
+          src={file.objectURL}
           className="w-16 h-16 object-cover rounded"
         />
         <span className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">
@@ -275,7 +276,7 @@ const RoadAnalyzerDashboard = () => {
     position: null,
     content: ''
   });
-  
+
   // Refs
   const toast = useRef(null);
   const fileUploadRef = useRef(null);
@@ -296,7 +297,7 @@ const RoadAnalyzerDashboard = () => {
     function handleEscape(e) {
       if (e.key === "Escape") {
         setModalData(null);
-        setCoordinatePopup({...coordinatePopup, visible: false});
+        setCoordinatePopup({ ...coordinatePopup, visible: false });
       }
     }
     if (modalData || coordinatePopup.visible) {
@@ -335,18 +336,18 @@ const RoadAnalyzerDashboard = () => {
       const response = await fetch(`${NOMINATIM_API}?q=${encodeURIComponent(searchQuery)}&format=json&limit=5`);
       const data = await response.json();
       setSearchResults(data);
-      
+
       if (data.length > 0) {
         const firstResult = data[0];
         const newCenter = {
           lat: parseFloat(firstResult.lat),
           lng: parseFloat(firstResult.lon)
         };
-        
+
         if (mapRef.current) {
           mapRef.current.flyTo(newCenter, 14);
         }
-        
+
         showToast('success', 'Location Found', `Showing results for ${firstResult.display_name}`);
       } else {
         showToast('info', 'No Results', 'No locations found for your search');
@@ -364,11 +365,11 @@ const RoadAnalyzerDashboard = () => {
       lat: parseFloat(result.lat),
       lng: parseFloat(result.lon)
     };
-    
+
     if (mapRef.current) {
       mapRef.current.flyTo(newCenter, 16);
     }
-    
+
     setSearchQuery(result.display_name);
     setSearchResults([]);
   };
@@ -379,7 +380,7 @@ const RoadAnalyzerDashboard = () => {
     setIsAnalyzing(true);
     setProgress(0);
     setAnalysisResult(null);
-    
+
     try {
       const results = await analyzeImages();
       if (results.length > 0) {
@@ -457,6 +458,34 @@ const RoadAnalyzerDashboard = () => {
     }
   };
 
+
+  // Heat map implementation
+  const analyzeHeatMapData = async () => {
+    try {
+      const res = await fetch(HEAT_MAP_DATA, {
+        method: 'GET',
+      });
+
+      if (!res.ok) {
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch {
+          errorData = { error: res.statusText };
+        }
+        throw new Error(errorData.error || 'Analysis failed');
+      }
+
+      return await res.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      showToast('error', 'Error getting heat map data', error.message || 'Failed to analyze image');
+      return null;
+    }
+  };
+
+
+
   const processAnalysisResults = (results) => {
     const randomRoadType = roadTypes[Math.floor(Math.random() * roadTypes.length)];
     const result = {
@@ -473,7 +502,7 @@ const RoadAnalyzerDashboard = () => {
       imagesAnalyzed: images.length,
       coordinates: points
     };
-    
+
     setAnalysisResult(result);
     setAllData(prev => [...prev, ...results]);
     setPredictions(prev => [...prev, ...results.map(r => r.label)]);
@@ -486,7 +515,7 @@ const RoadAnalyzerDashboard = () => {
   };
 
   const showAnalysisComplete = (result) => {
-    showToast('success', 'Analysis Complete!', 
+    showToast('success', 'Analysis Complete!',
       <div className="space-y-1">
         <p>{result.imagesAnalyzed} images analyzed</p>
         <p>Road Type: {result.roadType.name}</p>
@@ -512,7 +541,7 @@ const RoadAnalyzerDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <Toast ref={toast} position="top-right" />
-      
+
       <DetectionModal modalData={modalData} setModalData={setModalData} />
       <CoordinatePopup popup={coordinatePopup} setCoordinatePopup={setCoordinatePopup} />
 
@@ -528,29 +557,29 @@ const RoadAnalyzerDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Project Name</label>
-              <InputText 
-                value={projectName} 
-                onChange={(e) => setProjectName(e.target.value)} 
+              <InputText
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
                 placeholder="Road Analysis Project"
                 className="w-full"
               />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Analysis Mode</label>
-              <Dropdown 
+              <Dropdown
                 options={[
-                  {name: 'Basic Road Analysis', value: 'basic'},
-                  {name: 'Advanced Pavement Analysis', value: 'pavement'},
-                  {name: 'Traffic Flow Estimation', value: 'traffic'}
-                ]} 
+                  { name: 'Basic Road Analysis', value: 'basic' },
+                  { name: 'Advanced Pavement Analysis', value: 'pavement' },
+                  { name: 'Traffic Flow Estimation', value: 'traffic' }
+                ]}
                 placeholder="Select Analysis Type"
                 className="w-full"
               />
             </div>
             <div className="flex items-end">
-              <Button 
-                label="Save Project" 
-                icon="pi pi-save" 
+              <Button
+                label="Save Project"
+                icon="pi pi-save"
                 className="p-button-outlined w-full"
               />
             </div>
@@ -569,7 +598,7 @@ const RoadAnalyzerDashboard = () => {
                     {images.length} {images.length === 1 ? 'image' : 'images'}
                   </span>
                 </div>
-                
+
                 <FileUpload
                   ref={fileUploadRef}
                   name="image"
@@ -607,28 +636,28 @@ const RoadAnalyzerDashboard = () => {
               </Card>
 
               {/* Map Section */}
-              <Card className="shadow-sm rounded-xl border border-gray-100">
+              <Card className="shadow-sm rounded-xl border border-gray-100 mb-[50px]" >
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-gray-800">Road Segment Selection</h2>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">Mode:</span>
-                    <ToggleButton 
-                      onLabel="Two Points" 
-                      offLabel="Single Point" 
-                      onIcon="pi pi-map-marker" 
+                    <ToggleButton
+                      onLabel="Two Points"
+                      offLabel="Single Point"
+                      onIcon="pi pi-map-marker"
                       offIcon="pi pi-map-marker"
-                      checked={selectionMode === 'both'} 
+                      checked={selectionMode === 'both'}
                       onChange={(e) => {
                         setSelectionMode(e.value ? 'both' : 'single');
                         if (!e.value) {
                           setPoints(points.slice(0, 1));
                         }
-                      }} 
+                      }}
                       className="w-32"
                     />
                   </div>
                 </div>
-                
+
                 {/* Search Bar */}
                 <div className="relative mb-4">
                   <InputText
@@ -646,7 +675,7 @@ const RoadAnalyzerDashboard = () => {
                     onClick={handleSearch}
                     loading={isSearching}
                   />
-                  
+
                   {/* Search Results Dropdown */}
                   {searchResults.length > 0 && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
@@ -663,7 +692,7 @@ const RoadAnalyzerDashboard = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="relative z-0" style={{ height: mapHeight }}>
                   <MapContainer
                     center={[51.505, -0.09]}
@@ -675,19 +704,19 @@ const RoadAnalyzerDashboard = () => {
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    <LocationMarker 
-                      points={points} 
-                      setPoints={setPoints} 
+                    <LocationMarker
+                      points={points}
+                      setPoints={setPoints}
                       selectionMode={selectionMode}
                       allData={allData}
                       setModalData={setModalData}
                       setCoordinatePopup={setCoordinatePopup}
                     />
                   </MapContainer>
-                  
+
                   <div className="absolute bottom-4 left-4 z-[1000] flex space-x-2">
-                    <Button 
-                      icon="pi pi-crosshairs" 
+                    <Button
+                      icon="pi pi-crosshairs"
                       className="p-button-rounded p-button-text bg-white shadow"
                       tooltip="Use current location"
                       tooltipOptions={{ position: 'right' }}
@@ -710,8 +739,8 @@ const RoadAnalyzerDashboard = () => {
                         });
                       }}
                     />
-                    <Button 
-                      icon="pi pi-trash" 
+                    <Button
+                      icon="pi pi-trash"
                       className="p-button-rounded p-button-text bg-white shadow"
                       tooltip="Clear points"
                       tooltipOptions={{ position: 'right' }}
@@ -720,7 +749,7 @@ const RoadAnalyzerDashboard = () => {
                     />
                   </div>
                 </div>
-                
+
                 {points.length > 0 && (
                   <div className="mt-4 space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -739,9 +768,9 @@ const RoadAnalyzerDashboard = () => {
                         </div>
                       )}
                     </div>
-                    <Button 
-                      label="Copy Coordinates" 
-                      icon="pi pi-copy" 
+                    <Button
+                      label="Copy Coordinates"
+                      icon="pi pi-copy"
                       className="p-button-text p-button-sm w-full text-blue-600"
                       onClick={() => {
                         const coords = points.map(p => `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`).join(' to ');
@@ -754,7 +783,7 @@ const RoadAnalyzerDashboard = () => {
               </Card>
             </div>
           </TabPanel>
-          
+
           <TabPanel header="Analysis Results">
             {analysisResult ? (
               <div className="mt-4 space-y-6">
@@ -779,7 +808,7 @@ const RoadAnalyzerDashboard = () => {
                     </div>
                   </div>
                 </Card>
-                
+
                 <Card className="shadow-sm rounded-xl border border-gray-100">
                   <h3 className="font-medium text-lg mb-4">Detailed Analysis</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -788,22 +817,21 @@ const RoadAnalyzerDashboard = () => {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-sm">Overall Condition</span>
-                          <span className={`text-sm font-medium ${
-                            analysisResult.condition === 'Good' ? 'text-green-600' : 'text-orange-600'
-                          }`}>
+                          <span className={`text-sm font-medium ${analysisResult.condition === 'Good' ? 'text-green-600' : 'text-orange-600'
+                            }`}>
                             {analysisResult.condition}
                           </span>
                         </div>
-                        <ProgressBar 
-                          value={analysisResult.condition === 'Good' ? 80 : 35} 
+                        <ProgressBar
+                          value={analysisResult.condition === 'Good' ? 80 : 35}
                           showValue={false}
                           className="h-2"
                           color={analysisResult.condition === 'Good' ? '#10B981' : '#F59E0B'}
                         />
                       </div>
-                      
+
                       <Divider />
-                      
+
                       <h4 className="font-medium text-gray-700 mb-2">Key Features</h4>
                       <ul className="space-y-2">
                         {analysisResult.features.map((feature, i) => (
@@ -814,7 +842,7 @@ const RoadAnalyzerDashboard = () => {
                         ))}
                       </ul>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-700 mb-2">Visual Summary</h4>
                       <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center">
@@ -824,18 +852,18 @@ const RoadAnalyzerDashboard = () => {
                           <p className="text-xs text-gray-400 mt-1">{images.length} images processed</p>
                         </div>
                       </div>
-                      
+
                       <Divider />
-                      
+
                       <div className="space-y-2">
-                        <Button 
-                          label="Export Report" 
-                          icon="pi pi-file-pdf" 
+                        <Button
+                          label="Export Report"
+                          icon="pi pi-file-pdf"
                           className="p-button-outlined w-full"
                         />
-                        <Button 
-                          label="View on Map" 
-                          icon="pi pi-map" 
+                        <Button
+                          label="View on Map"
+                          icon="pi pi-map"
                           className="p-button-outlined w-full"
                           onClick={() => {
                             setActiveTab(0);
@@ -881,9 +909,9 @@ const RoadAnalyzerDashboard = () => {
                 <p className="text-gray-500 max-w-md">
                   Run an analysis first to see detailed results about the road conditions and characteristics.
                 </p>
-                <Button 
-                  label="Go to Data Input" 
-                  icon="pi pi-arrow-left" 
+                <Button
+                  label="Go to Data Input"
+                  icon="pi pi-arrow-left"
                   className="p-button-text mt-4"
                   onClick={() => setActiveTab(0)}
                 />
@@ -910,33 +938,33 @@ const RoadAnalyzerDashboard = () => {
                 </span>
               )}
             </div>
-            
+
             <div className="flex space-x-3 w-full md:w-auto">
-              <Button 
-                label="Clear All" 
-                icon="pi pi-trash" 
+              <Button
+                label="Clear All"
+                icon="pi pi-trash"
                 className="p-button-outlined p-button-danger"
                 onClick={clearAllData}
                 disabled={(images.length === 0 && points.length === 0 && allData.length === 0) || isAnalyzing}
               />
-              <Button 
-                label={isAnalyzing ? `Analyzing (${progress}%)` : 'Analyze'} 
-                icon={isAnalyzing ? 'pi pi-spinner pi-spin' : 'pi pi-play'} 
+              <Button
+                label={isAnalyzing ? `Analyzing (${progress}%)` : 'Analyze'}
+                icon={isAnalyzing ? 'pi pi-spinner pi-spin' : 'pi pi-play'}
                 className="p-button-primary"
                 onClick={handleAnalyze}
-                disabled={isAnalyzing || images.length === 0 || points.length === 0 || 
+                disabled={isAnalyzing || images.length === 0 || points.length === 0 ||
                   (selectionMode === 'both' && points.length < 2)}
               />
             </div>
           </div>
-          
-          
+
+
           {isAnalyzing && (
             <div className="mt-2">
-              <ProgressBar 
-                value={progress} 
-                showValue={false} 
-                className="h-2" 
+              <ProgressBar
+                value={progress}
+                showValue={false}
+                className="h-2"
                 color={progress < 50 ? '#3B82F6' : progress < 80 ? '#8B5CF6' : '#10B981'}
               />
             </div>

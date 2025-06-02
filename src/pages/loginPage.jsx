@@ -1,22 +1,75 @@
+// LoginPage.jsx
 import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaCar, FaRoad, FaTrafficLight, FaMapMarkedAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from './apiService';
+import { InputText } from 'primereact/inputtext';
+import { Password } from 'primereact/password';
+import { Button } from 'primereact/button';
+import { Checkbox } from 'primereact/checkbox';
+import { Message } from 'primereact/message';
+import { Divider } from 'primereact/divider';
+import { classNames } from 'primereact/utils';
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [formErrors, setFormErrors] = useState({ email: '', password: '' });
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    let valid = true;
+    const errors = { email: '', password: '' };
+
+    if (!email) {
+      errors.email = 'Email is required';
+      valid = false;
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+      errors.email = 'Invalid email address';
+      valid = false;
+    }
+
+    if (!password) {
+      errors.password = 'Password is required';
+      valid = false;
+    } else if (password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+      valid = false;
+    }
+
+    setFormErrors(errors);
+    return valid;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
+    if (!validateForm()) return;
+
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await loginUser(email, password);
+      
+      // Store token and user data
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      // Redirect to dashboard
+      navigate('/');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-600 bg-opacity-70 text-white flex items-center justify-center p-4 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-gray-600 bg-opacity-70 text-white flex items-center justify-center py-[70px] p-4 font-sans relative overflow-hidden">
       {/* Animated floating road elements */}
       <div className="absolute w-full h-full pointer-events-none">
         <div className="absolute top-[20%] left-[5%] opacity-10 text-amber-500">
@@ -63,22 +116,32 @@ function LoginPage() {
             <p className="text-gray-400">Sign in to access your dashboard</p>
           </div>
 
+          {error && (
+            <Message 
+              severity="error" 
+              text={error}
+              className="w-full mb-4 animate-fade-in"
+            />
+          )}
+
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1 animate-slide-up delay-100">
               <label htmlFor="email" className="text-sm font-medium text-gray-300">
                 Email Address
               </label>
               <div className="relative">
-                <input
+                <InputText
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm transition-all focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:ring-opacity-20"
+                  className={classNames('w-full', { 'p-invalid': formErrors.email })}
                   placeholder="your@email.com"
                   required
                 />
-                <div className="absolute bottom-0 left-0 h-0.5 bg-amber-500 transition-all duration-300 w-0"></div>
+                {formErrors.email && (
+                  <small className="p-error animate-fade-in">{formErrors.email}</small>
+                )}
               </div>
             </div>
 
@@ -87,25 +150,29 @@ function LoginPage() {
                 Password
               </label>
               <div className="relative">
-                <input
-                  type="password"
+                <Password
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm transition-all focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:ring-opacity-20"
+                  className={classNames('w-full', { 'p-invalid': formErrors.password })}
                   placeholder="••••••••"
+                  toggleMask
+                  feedback={false}
                   required
                 />
-                <div className="absolute bottom-0 left-0 h-0.5 bg-amber-500 transition-all duration-300 w-0"></div>
+                {formErrors.password && (
+                  <small className="p-error animate-fade-in">{formErrors.password}</small>
+                )}
               </div>
             </div>
 
             <div className="flex justify-between items-center animate-fade-in delay-300">
               <div className="flex items-center gap-2">
-                <input
-                  id="remember-me"
+                <Checkbox
+                  inputId="remember-me"
                   name="remember-me"
-                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.checked)}
                   className="w-4 h-4 text-amber-500 bg-gray-800 border-gray-700 rounded focus:ring-amber-500"
                 />
                 <label htmlFor="remember-me" className="text-sm text-gray-300">
@@ -114,7 +181,7 @@ function LoginPage() {
               </div>
 
               <div>
-                <a href="/n" className="text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors">
+                <a href="/forgot-password" className="text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors">
                   Forgot password?
                 </a>
               </div>
@@ -153,7 +220,7 @@ function LoginPage() {
 
           <div className="mt-6 text-center text-sm text-gray-400 animate-fade-in delay-700">
             Don't have an account?{' '}
-            <a href="/m" className="font-medium text-amber-500 hover:text-amber-400 transition-colors">
+            <a href="/signup" className="font-medium text-amber-500 hover:text-amber-400 transition-colors">
               Sign up
             </a>
           </div>

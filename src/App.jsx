@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { PrimeReactProvider } from 'primereact/api';
+import { ThemeProvider } from './pages/ThemeContext.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard.jsx';
 import About from './pages/About';
 import Navbar from './components/Navbar';
 import LoginPage from './pages/loginPage';
+import SignupPage from './pages/Signup';
+import ContactUsPage from './pages/ContactUsPage.jsx';
 import Footer from "./components/footer.jsx";
+import Screenicon from "./components/screenIcon.jsx"
 
 function App() {
   // Initialize darkMode state more safely
@@ -55,6 +59,7 @@ function App() {
   };
 
   return (
+    <ThemeProvider>
     <PrimeReactProvider value={{ unstyled: false, ripple: true }}>
       <Router>
         <div className={`min-h-screen flex flex-col ${
@@ -66,13 +71,17 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
               <Route path="/home" element={<Home />} />
+              <Route path="/contact" element={<ContactUsPage />} />
             </Routes>
           </main>
           <Footer />
+         <Screenicon />
         </div>
       </Router>
     </PrimeReactProvider>
+    </ThemeProvider>
   );
 }
 
