@@ -47,7 +47,7 @@ async function initDb() {
     db = await mysql.createPool({
       host: 'localhost',
       user: 'root',
-      password: '75223031',
+      password: 'wmL0/m3wXDc/UcIn',
       database: 'smartroads',
       waitForConnections: true,
       connectionLimit: 10,
@@ -239,6 +239,48 @@ app.get('/api/spot', async (req, res) => {
     res.status(500).json({ error: 'Server error fetching spot info' });
   }
 });
+
+
+
+
+// /heatmap-data Endpoint
+app.get('/heatmap-data', async (req, res) => {
+  try {
+    
+    const [rows] = await db.query(`
+      SELECT
+        ROUND(lat, 3) AS lat,
+        ROUND(lng, 3) AS lng,
+        SUM(
+          CASE 
+            WHEN label = 'major' THEN 3
+            WHEN label = 'minor' THEN 2
+            ELSE 0
+          END
+        ) AS weighted_score,
+        COUNT(*) AS total
+      FROM detections
+      GROUP BY ROUND(lat, 3), ROUND(lng, 3);
+    `);
+
+    // Calculate intensity for each cluster 
+    const heatmapPoints = rows.map(row => {
+      const intensity = row.total === 0 ? 0 : row.weighted_score / (row.total * 3);
+      return {
+        lat: row.lat,
+        lng: row.lng,
+        intensity: parseFloat(intensity.toFixed(2))
+      };
+    });
+
+    // Send JSON response
+    res.json(heatmapPoints);
+  } catch (error) {
+    console.error('Error fetching heatmap data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on http://localhost:${PORT}`);
