@@ -19,7 +19,7 @@ console.log('📸 ITERATION_NAME:', process.env.ITERATION_NAME);
 
 const app = express();
 const PORT = 5000;
-
+const SECRET_KEY = "12345678"
 // CORS
 const allowedOrigins = [
   'http://localhost:3000',
@@ -436,4 +436,167 @@ app.get('/heatmap-data', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on http://localhost:${PORT}`);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+const generateToken = (user) => {
+  return jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '24h' });
+};
+
+// Routes
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+
+    const users = []// get users from database 
+
+    // Check if user exists
+    const existingUser = users.find(user => user.email === email);
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const newUser = {
+      id: users.length + 1,
+      email,
+      password: hashedPassword,
+      createdAt: new Date()
+    };
+
+    users.push(newUser);
+
+    // Generate token
+    const token = generateToken(newUser);
+
+    // Return user and token
+    res.status(201).json({
+      token,
+      user: {
+        id: newUser.id,
+        email: newUser.email
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Registration failed' });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    const users = []// get users from database 
+    // Mock database users
+  
+    // Find user
+    const user = users.find(user => user.email === email);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Generate token
+    const token = generateToken(user);
+
+    // Return user and token
+    res.status(200).json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Login failed' });
+  }
+});
+
+
+
+app.post('/api/contact_us_messages', async (req, res) => {
+  try {
+    const { email, content, name, isPublic } = req.body;
+
+    // Validate input
+    if (!email || !content) {
+      return res.status(400).json({ message: 'Email and message content are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+
+    // In a real application, we will:
+    // 1. Save to database
+    // 2. Possibly send email notification
+    // 3. Handle public/private messages differently
+
+    // Mock database save
+    const newMessage = {
+      id: Date.now().toString(),
+      name: name || 'Anonymous',
+      email,
+      content,
+      isPublic: isPublic !== false, // default to true if not specified
+      createdAt: new Date().toISOString(),
+      likes: 0,
+      dislikes: 0,
+      adminReply: null
+    };
+
+ 
+
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Return success response
+    res.status(201).json({
+      message: isPublic ? 'Message posted publicly!' : 'Private message received!',
+      data: newMessage
+    });
+
+  } catch (error) {
+    console.error('Error processing contact form:', error);
+    res.status(500).json({
+      message: 'An error occurred while processing your message',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });

@@ -1,16 +1,27 @@
 import React from 'react';
+import { useTheme } from './ThemeContext';
 import { FaRoad, FaCarCrash, FaChartLine, FaMapMarkedAlt, FaUsers, FaLightbulb } from 'react-icons/fa';
 import { IoMdSpeedometer } from 'react-icons/io';
-import teamMembers from '../pages/team'; // You'll create this data file
+import teamMembers from '../pages/team';
 
 const AboutPage = () => {
+  const { darkMode } = useTheme();
+
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'
+    }`}>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20 overflow-hidden">
+      <div className={`relative bg-gradient-to-r ${
+        darkMode ? 'from-gray-800 to-gray-700' : 'from-blue-900 to-blue-700'
+      } text-white py-20 overflow-hidden`}>
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-amber-500 rounded-full filter blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-blue-400 rounded-full filter blur-3xl"></div>
+          <div className={`absolute top-1/4 left-1/4 w-32 h-32 ${
+            darkMode ? 'bg-amber-600' : 'bg-amber-500'
+          } rounded-full filter blur-3xl`}></div>
+          <div className={`absolute bottom-1/4 right-1/4 w-40 h-40 ${
+            darkMode ? 'bg-blue-500' : 'bg-blue-400'
+          } rounded-full filter blur-3xl`}></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -24,14 +35,20 @@ const AboutPage = () => {
       </div>
 
       {/* Mission Section */}
-      <div className="py-16 bg-white">
+      <div className={`py-16 transition-colors duration-300 ${
+        darkMode ? 'bg-gray-800' : 'bg-white'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
-            <h2 className="text-base text-amber-600 font-semibold tracking-wide uppercase">Our Mission</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-base text-amber-500 font-semibold tracking-wide uppercase">Our Mission</h2>
+            <p className={`mt-2 text-3xl leading-8 font-extrabold tracking-tight ${
+              darkMode ? 'text-white' : 'text-gray-900'
+            } sm:text-4xl`}>
               Building safer roads for everyone
             </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+            <p className={`mt-4 max-w-2xl text-xl ${
+              darkMode ? 'text-gray-300' : 'text-gray-500'
+            } lg:mx-auto`}>
               We're committed to reducing road accidents and maintenance costs by providing real-time, accurate pothole detection and analytics to cities and municipalities.
             </p>
           </div>
@@ -40,15 +57,21 @@ const AboutPage = () => {
             <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((feature, index) => (
                 <div key={index} className="pt-6">
-                  <div className="flow-root bg-gray-50 rounded-lg px-6 pb-8 h-full">
+                  <div className={`flow-root rounded-lg px-6 pb-8 h-full transition-colors duration-300 ${
+                    darkMode ? 'bg-gray-700' : 'bg-gray-50'
+                  }`}>
                     <div className="-mt-6">
                       <div>
                         <span className="inline-flex items-center justify-center p-3 bg-amber-500 rounded-md shadow-lg">
                           <feature.icon className="h-6 w-6 text-white" aria-hidden="true" />
                         </span>
                       </div>
-                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">{feature.name}</h3>
-                      <p className="mt-5 text-base text-gray-500">
+                      <h3 className={`mt-8 text-lg font-medium tracking-tight ${
+                        darkMode ? 'text-white' : 'text-gray-900'
+                      }`}>{feature.name}</h3>
+                      <p className={`mt-5 text-base ${
+                        darkMode ? 'text-gray-300' : 'text-gray-500'
+                      }`}>
                         {feature.description}
                       </p>
                     </div>
@@ -61,15 +84,21 @@ const AboutPage = () => {
       </div>
 
       {/* Technology Section */}
-      <div className="py-16 bg-gray-50">
+      <div className={`py-16 transition-colors duration-300 ${
+        darkMode ? 'bg-gray-900' : 'bg-gray-50'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
             <div className="mb-8 lg:mb-0">
-              <h2 className="text-base text-amber-600 font-semibold tracking-wide uppercase">Our Technology</h2>
-              <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              <h2 className="text-base text-amber-500 font-semibold tracking-wide uppercase">Our Technology</h2>
+              <p className={`mt-2 text-3xl leading-8 font-extrabold tracking-tight ${
+                darkMode ? 'text-white' : 'text-gray-900'
+              } sm:text-4xl`}>
                 Advanced AI for smarter roads
               </p>
-              <p className="mt-4 text-lg text-gray-500">
+              <p className={`mt-4 text-lg ${
+                darkMode ? 'text-gray-300' : 'text-gray-500'
+              }`}>
                 Our system combines cutting-edge computer vision algorithms with IoT sensors to detect and classify road damage with over 95% accuracy.
               </p>
               
@@ -79,8 +108,12 @@ const AboutPage = () => {
                     <IoMdSpeedometer className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">Real-time Processing</h4>
-                    <p className="mt-1 text-gray-500">Analyzes road conditions in real-time as vehicles drive.</p>
+                    <h4 className={`text-lg font-medium ${
+                      darkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Real-time Processing</h4>
+                    <p className={`mt-1 ${
+                      darkMode ? 'text-gray-300' : 'text-gray-500'
+                    }`}>Analyzes road conditions in real-time as vehicles drive.</p>
                   </div>
                 </div>
                 
@@ -89,8 +122,12 @@ const AboutPage = () => {
                     <FaLightbulb className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">Machine Learning</h4>
-                    <p className="mt-1 text-gray-500">Continuously improves detection accuracy over time.</p>
+                    <h4 className={`text-lg font-medium ${
+                      darkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Machine Learning</h4>
+                    <p className={`mt-1 ${
+                      darkMode ? 'text-gray-300' : 'text-gray-500'
+                    }`}>Continuously improves detection accuracy over time.</p>
                   </div>
                 </div>
                 
@@ -99,8 +136,12 @@ const AboutPage = () => {
                     <FaMapMarkedAlt className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">GIS Integration</h4>
-                    <p className="mt-1 text-gray-500">Maps potholes for efficient repair planning.</p>
+                    <h4 className={`text-lg font-medium ${
+                      darkMode ? 'text-white' : 'text-gray-900'
+                    }`}>GIS Integration</h4>
+                    <p className={`mt-1 ${
+                      darkMode ? 'text-gray-300' : 'text-gray-500'
+                    }`}>Maps potholes for efficient repair planning.</p>
                   </div>
                 </div>
               </div>
@@ -109,7 +150,7 @@ const AboutPage = () => {
             <div className="relative">
               <img 
                 className="w-full rounded-lg shadow-xl ring-1 ring-black ring-opacity-5" 
-                src="/images/tech-dashboard.jpg" 
+                src={darkMode ? "/images/tech-dashboard-dark.jpg" : "/images/tech-dashboard-light.jpg"} 
                 alt="Pothole Spotter technology dashboard" 
               />
               <div className="mt-4 flex justify-center">
@@ -128,14 +169,20 @@ const AboutPage = () => {
       </div>
 
       {/* Team Section */}
-      <div className="py-16 bg-white">
+      <div className={`py-16 transition-colors duration-300 ${
+        darkMode ? 'bg-gray-800' : 'bg-white'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-base text-amber-600 font-semibold tracking-wide uppercase">Our Team</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-base text-amber-500 font-semibold tracking-wide uppercase">Our Team</h2>
+            <p className={`mt-2 text-3xl leading-8 font-extrabold tracking-tight ${
+              darkMode ? 'text-white' : 'text-gray-900'
+            } sm:text-4xl`}>
               The people behind Pothole Spotter
             </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
+            <p className={`mt-4 max-w-2xl text-xl ${
+              darkMode ? 'text-gray-300' : 'text-gray-500'
+            } mx-auto`}>
               A diverse team of engineers, data scientists, and urban planners committed to better infrastructure.
             </p>
           </div>
@@ -143,7 +190,9 @@ const AboutPage = () => {
           <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {teamMembers.map((person) => (
               <div key={person.name} className="pt-6">
-                <div className="flow-root bg-gray-50 rounded-lg px-6 pb-8 h-full">
+                <div className={`flow-root rounded-lg px-6 pb-8 h-full transition-colors duration-300 ${
+                  darkMode ? 'bg-gray-700' : 'bg-gray-50'
+                }`}>
                   <div className="-mt-6 text-center">
                     <div className="flex justify-center">
                       <img
@@ -152,14 +201,20 @@ const AboutPage = () => {
                         alt={person.name}
                       />
                     </div>
-                    <h3 className="mt-6 text-lg font-medium text-gray-900 tracking-tight">{person.name}</h3>
-                    <p className="text-amber-600">{person.role}</p>
-                    <p className="mt-3 text-base text-gray-500">
+                    <h3 className={`mt-6 text-lg font-medium tracking-tight ${
+                      darkMode ? 'text-white' : 'text-gray-900'
+                    }`}>{person.name}</h3>
+                    <p className="text-amber-500">{person.role}</p>
+                    <p className={`mt-3 text-base ${
+                      darkMode ? 'text-gray-300' : 'text-gray-500'
+                    }`}>
                       {person.bio}
                     </p>
                     <div className="mt-4 flex justify-center space-x-4">
                       {person.socialLinks.map((link) => (
-                        <a key={link.name} href={link.url} className="text-gray-400 hover:text-amber-500">
+                        <a key={link.name} href={link.url} className={`${
+                          darkMode ? 'text-gray-400 hover:text-amber-500' : 'text-gray-500 hover:text-amber-600'
+                        }`}>
                           <span className="sr-only">{link.name}</span>
                           <link.icon className="h-6 w-6" />
                         </a>
@@ -174,7 +229,9 @@ const AboutPage = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gray-900">
+      <div className={`transition-colors duration-300 ${
+        darkMode ? 'bg-gray-900' : 'bg-gray-900'
+      }`}>
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             <span className="block">Ready to improve your city's roads?</span>
