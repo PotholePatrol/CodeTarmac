@@ -83,7 +83,7 @@ function Footer() {
                 <FaTwitter className="text-xl group-hover:scale-110 transition-transform" />
               </a>
               <a 
-                href="https://github.com/StevenKariuki" 
+                href="https://github.com/PotholePatrol" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:text-amber-500 hover:bg-gray-700 transition-all duration-300 group"

@@ -114,9 +114,13 @@ PORT=5000
 
 ## 📸 Sample of the page Preview
 
-![image](https://github.com/user-attachments/assets/3fa1570b-5477-4392-bf1b-4a547dcdce69)
+![image](https://github.com/user-attachments/assets/0ad1e31a-23ac-409b-b674-debedf55b23a)
 
-![image](https://github.com/user-attachments/assets/a049d705-7fdd-46d8-ae6e-46b54039ec05)
+![Screenshot 2025-06-03 155719](https://github.com/user-attachments/assets/0a65969a-6161-420d-b282-15d9b882359d)
+![Screenshot 2025-06-03 155803](https://github.com/user-attachments/assets/0b901392-31fa-4b40-b7c8-3b575893ee20)
+
+![Screenshot 2025-06-03 155746](https://github.com/user-attachments/assets/41597540-39dc-4f2b-b3c2-1becd117123d)
+
 
 
 ---
